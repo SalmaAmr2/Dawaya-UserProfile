@@ -4,14 +4,48 @@ import { User, Shield, Lock, MapPin, X, MessageSquare, Send, PhoneCall } from 'l
 /* 1. Edit Profile Modal */
 export function EditProfileModal({ profile, onSave, onClose }) {
   const [formData, setFormData] = useState({ ...profile });
+  const [validationError, setValidationError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setValidationError('');
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Validate Username
+    if (formData.username.trim().length < 2) {
+      setValidationError('اسم المستخدم يجب ألا يقل عن حرفين');
+      return;
+    }
+    if (formData.username.trim().length > 12) {
+      setValidationError('اسم المستخدم يجب ألا يزيد عن 12 حرفاً');
+      return;
+    }
+
+    // Validate Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setValidationError('البريد الإلكتروني غير صحيح');
+      return;
+    }
+
+    // Validate Phone Number (Egyptian format)
+    const phoneRegex = /^01[0125][0-9]{8}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      setValidationError('رقم الهاتف غير صحيح. يجب أن يكون رقم هاتف مصري صحيح (مثال: 01012345678)');
+      return;
+    }
+
+    // Validate Age
+    const ageNum = Number(formData.age);
+    if (isNaN(ageNum) || ageNum <= 0 || ageNum > 120) {
+      setValidationError('يرجى إدخال عمر صحيح بين 1 و 120 سنة');
+      return;
+    }
+
     onSave(formData);
   };
 
@@ -29,6 +63,19 @@ export function EditProfileModal({ profile, onSave, onClose }) {
         </div>
         
         <div className="modal-body">
+          {validationError && (
+            <div style={{
+              backgroundColor: 'var(--color-danger-light)',
+              color: 'var(--color-danger)',
+              padding: '12px',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: '600',
+              marginBottom: '16px'
+            }}>
+              {validationError}
+            </div>
+          )}
           <div className="form-group">
             <label className="form-label">الاسم الكامل</label>
             <input
@@ -312,12 +359,12 @@ export function LocationModal({ location, onSave, onClose }) {
 }
 
 /* 4. Support Manager Chat Modal */
-export function SupportModal({ onClose }) {
+export function SupportModal({ profileName, onClose }) {
   const [messages, setMessages] = useState([
     {
       id: 1,
       sender: 'manager',
-      text: 'مرحباً أليكس! أنا سليم، مدير حساب الخدمات الخاص بك. كيف يمكنني مساعدتك اليوم بخصوص رعايتك الطبية؟',
+      text: `مرحباً ${profileName || 'عضو داوايا'}! أنا سليم، مدير حساب الخدمات الخاص بك. كيف يمكنني مساعدتك اليوم بخصوص رعايتك الطبية؟`,
       time: '11:30 م'
     }
   ]);
@@ -341,7 +388,7 @@ export function SupportModal({ onClose }) {
 
     // Simulated response from Account Manager after 2 seconds
     setTimeout(() => {
-      let responseText = 'تم استلام طلبك يا أستاذ أليكس. سأقوم بالتنسيق مع الفريق الطبي فوراً والرد عليك خلال دقائق.';
+      let responseText = `تم استلام طلبك يا أستاذ/ة ${profileName || 'عضو داوايا'}. سأقوم بالتنسيق مع الفريق الطبي فوراً والرد عليك خلال دقائق.`;
       if (newMsg.text.includes('حجز') || newMsg.text.includes('موعد')) {
         responseText = 'بكل سرور. هل تفضل موعداً في الفترة الصباحية أم المسائية؟ سأرتب ذلك لك بأقصى سرعة.';
       } else if (newMsg.text.includes('وصفة') || newMsg.text.includes('دواء')) {

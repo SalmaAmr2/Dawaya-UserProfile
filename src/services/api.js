@@ -5,7 +5,7 @@ function getHeaders() {
   const headers = {
     'Content-Type': 'application/json',
   };
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('userToken');
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
@@ -67,7 +67,7 @@ export const api = {
     const token = data.token || data.accessToken || (data.data && (data.data.token || data.data.accessToken));
     
     if (token) {
-      localStorage.setItem('token', token);
+      localStorage.setItem('userToken', token);
     } else {
       throw new Error('لم يتم استلام رمز التفويض من الخادم.');
     }
@@ -98,7 +98,7 @@ export const api = {
       console.error('Detailed Server Error payload:', errorData);
 
       if (response.status === 401) {
-        localStorage.removeItem('token');
+        localStorage.removeItem('userToken');
         throw new Error('انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى.');
       }
       throw new Error(errorData.message || 'فشل في تحميل بيانات الملف الشخصي من الخادم السحابي.');
@@ -146,11 +146,11 @@ export const api = {
 
   // Logout
   logout() {
-    localStorage.removeItem('token');
+    localStorage.removeItem('userToken');
   },
 
   // Check if user is logged in
   isLoggedIn() {
-    return !!localStorage.getItem('token');
+    return !!localStorage.getItem('userToken');
   }
 };

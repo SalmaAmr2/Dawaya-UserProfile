@@ -91,7 +91,10 @@ export default function UserProfile({
           <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '32px', position: 'relative' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
               <img 
-                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=240" 
+                src={profile.gender === 'أنثى' || profile.gender === 'female'
+                  ? "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=240" 
+                  : "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=240"
+                } 
                 alt="Profile Avatar" 
                 style={{
                   width: '100px',
