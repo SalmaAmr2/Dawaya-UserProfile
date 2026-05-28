@@ -13,66 +13,6 @@ function getHeaders() {
 }
 
 export const api = {
-  // Register a new user
-  async register(username, email, password, phone, gender) {
-    const response = await fetch(`${BASE_URL}/api/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username,
-        email,
-        password,
-        phone: String(phone),
-        gender
-      }),
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.');
-    }
-    return response.json();
-  },
-
-  // Verify email OTP
-  async verify(email, otp) {
-    const response = await fetch(`${BASE_URL}/api/auth/verify`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, otp: String(otp) }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'رمز التحقق غير صحيح أو انتهت صلاحيته.');
-    }
-    return response.json();
-  },
-
-  // Login
-  async login(email, password) {
-    const response = await fetch(`${BASE_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة.');
-    }
-
-    const data = await response.json();
-    // Support common response structures like { token }, { accessToken }, { data: { token } }
-    const token = data.token || data.accessToken || (data.data && (data.data.token || data.data.accessToken));
-    
-    if (token) {
-      localStorage.setItem('userToken', token);
-    } else {
-      throw new Error('لم يتم استلام رمز التفويض من الخادم.');
-    }
-    return data;
-  },
 
   // Get Profile
   async getProfile() {
