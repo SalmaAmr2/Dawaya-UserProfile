@@ -121,7 +121,17 @@ export const api = {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      console.warn(`Profile update failed with status: ${response.status}`);
+      let errorText = '';
+      let errorData = {};
+      try {
+        errorText = await response.text();
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        errorData = { message: errorText || `HTTP Error ${response.status}` };
+      }
+      
+      console.error('Detailed Server Update Error payload:', errorData);
       throw new Error(errorData.message || 'فشل في تحديث بيانات الملف الشخصي.');
     }
 
@@ -137,7 +147,17 @@ export const api = {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      console.warn(`Password change failed with status: ${response.status}`);
+      let errorText = '';
+      let errorData = {};
+      try {
+        errorText = await response.text();
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        errorData = { message: errorText || `HTTP Error ${response.status}` };
+      }
+      
+      console.error('Detailed Server Password Error payload:', errorData);
       throw new Error(errorData.message || 'فشل في تغيير كلمة المرور. يرجى التحقق من كلمة المرور الحالية.');
     }
 
