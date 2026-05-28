@@ -288,7 +288,7 @@ function App() {
         },
         {
           path: "/forgetpassword",
-          element: <VerifyOTP />,
+          element: <ForgetPassword />,
         },
         {
           path: "/resetpassword",
