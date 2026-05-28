@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
 import UserProfile from './components/UserProfile';
 import Toast from './components/Toast';
-import Auth from './components/Auth';
 import { api } from './services/api';
 import { 
   EditProfileModal, 
@@ -195,44 +193,52 @@ function App() {
     );
   };
 
-  // Unauthenticated view render
-  if (!token) {
-    return (
-      <>
-        <Auth 
-          onAuthSuccess={() => setToken(localStorage.getItem('token') || 'loggedIn')} 
-          showToast={showToast} 
-        />
-        
-        {/* Elegant Alert Toasts */}
-        <div className="toast-container">
-          {toasts.map((t) => (
-            <Toast 
-              key={t.id} 
-              message={t.message} 
-              type={t.type} 
-              onClose={() => removeToast(t.id)} 
-            />
-          ))}
-        </div>
-      </>
-    );
-  }
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       
-      {/* 1. Header (Navbar) */}
-      <Navbar 
-        activeNotifications={notifications} 
-        clearNotificationCount={clearNotificationsCount}
-        profileName={profile.fullName}
-        onLogout={() => {
-          api.logout();
-          setToken('');
-          showToast('تم تسجيل الخروج بنجاح.', 'success');
-        }}
-      />
+      {/* 1. Header (Standalone / Local Mode) */}
+      <header style={{
+        backgroundColor: '#ffffff',
+        borderBottom: '1px solid var(--color-border)',
+        padding: '16px 0',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+      }}>
+        <div className="container" style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <h1 style={{ color: 'var(--color-brand)', fontSize: '24px', fontWeight: '800', margin: 0 }}>DAWAYA</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{
+              fontSize: '12px',
+              backgroundColor: 'var(--color-primary-light)',
+              color: 'var(--color-brand)',
+              padding: '6px 12px',
+              borderRadius: '9999px',
+              fontWeight: '700'
+            }}>
+              {token ? 'متصل بالسحابة 🌐' : 'عرض محلي 💻'}
+            </span>
+            {token && (
+              <button 
+                onClick={() => {
+                  api.logout();
+                  setToken('');
+                  showToast('تم تسجيل الخروج بنجاح.', 'success');
+                }}
+                className="btn btn-secondary"
+                style={{ padding: '6px 12px', fontSize: '12px', border: '1px solid var(--color-border)' }}
+              >
+                تسجيل الخروج
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
 
       {/* 2. Main Page Content (User Profile) */}
       <main style={{ flex: 1, paddingBottom: '48px' }}>
