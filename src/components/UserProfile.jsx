@@ -133,8 +133,8 @@ export default function UserProfile({
   );
 
   return (
-    <div className="container" style={{ margin: "10px" }}>
-      <div className="app-grid" style={{ margin: "30px" }}>
+    <div className="container" style={{ margin: "5px" }}>
+      <div className="app-grid" style={{ margin: "10px" }}>
 
         {/* RIGHT COLUMN: Banner, Information, and Security details */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
