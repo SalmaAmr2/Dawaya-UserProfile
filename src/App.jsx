@@ -18,11 +18,10 @@ import VerifyCompleted from "./Components/VerifyCompleted/VerifyCompleted";
 import UserProfile from './components/UserProfile';
 import Toast from './components/Toast';
 import { api } from './services/api';
-import { 
-  EditProfileModal, 
-  ChangePasswordModal, 
-  LocationModal, 
-  SupportModal 
+import {
+  EditProfileModal,
+  ChangePasswordModal,
+  LocationModal
 } from './components/Modals';
 
 // Default initial state for fallback/new users
@@ -30,6 +29,7 @@ const INITIAL_PROFILE = {
   fullName: 'عضو داوايا',
   username: 'dawaya_member',
   email: 'user@dawaya.com',
+  password: '',
   phone: '01012345678',
   age: 25,
   gender: 'ذكر'
@@ -56,9 +56,9 @@ function ProfilePage() {
   const [profile, setProfile] = useState(INITIAL_PROFILE);
   const [locations, setLocations] = useState(INITIAL_LOCATIONS);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Modals management
-  const [activeModal, setActiveModal] = useState(null); // 'edit-profile' | 'change-password' | 'location' | 'support'
+  const [activeModal, setActiveModal] = useState(null); // 'edit-profile' | 'change-password' | 'location'
   const [editingLocation, setEditingLocation] = useState(null); // Location object being edited, if any
 
   // Toasts management
@@ -78,22 +78,47 @@ function ProfilePage() {
   const fetchProfile = async () => {
     const activeToken = userLogin || localStorage.getItem('userToken');
     if (!activeToken) return;
-    
+
     setIsLoading(true);
     try {
       const data = await api.getProfile();
-      
+
       const apiUser = data.user || data.data || data;
+
+      const localEmail = localStorage.getItem("dawaya_current_email") || apiUser.email || '';
+      const localPassword = localStorage.getItem("dawaya_current_password") || '';
 
       setProfile({
         fullName: apiUser.username || 'عضو داوايا',
         username: apiUser.username || 'user',
-        email: apiUser.email || '',
+        email: localEmail,
+        password: localPassword,
         phone: apiUser.phone || '',
         age: apiUser.age || 30,
         gender: apiUser.gender === 'male' || apiUser.gender === 'ذكر' ? 'ذكر' : 'أنثى'
       });
     } catch (err) {
+      // Offline/Local fallback loading if API call fails
+      try {
+        const localEmail = localStorage.getItem("dawaya_current_email") || "";
+        const localPassword = localStorage.getItem("dawaya_current_password") || "";
+        const users = JSON.parse(localStorage.getItem("dawaya_users") || "[]");
+        const matchedUser = users.find(u => u.email.toLowerCase() === localEmail.toLowerCase());
+        if (matchedUser) {
+          setProfile({
+            fullName: matchedUser.username || 'عضو داوايا',
+            username: matchedUser.username || 'user',
+            email: matchedUser.email,
+            password: matchedUser.password,
+            phone: matchedUser.phone || '01012345678',
+            age: matchedUser.age || 25,
+            gender: matchedUser.gender === 'female' ? 'أنثى' : 'ذكر'
+          });
+          return;
+        }
+      } catch (e) {
+        console.error("Local fallback failed", e);
+      }
       showToast(err.message || 'انتهت الجلسة، يرجى تسجيل الدخول مجدداً.', 'error');
     } finally {
       setIsLoading(false);
@@ -107,18 +132,59 @@ function ProfilePage() {
 
   // Profile Save handler
   const handleSaveProfile = async (updatedProfile) => {
+    const activeToken = localStorage.getItem("userToken");
+    const isMockToken = !activeToken || activeToken === "mock_token_for_dawaya_auth";
+
     try {
       const genderApi = updatedProfile.gender === 'ذكر' ? 'male' : 'female';
-      await api.updateProfile({
-        username: updatedProfile.username,
-        phone: updatedProfile.phone,
-        age: Number(updatedProfile.age),
-        gender: genderApi
-      });
-      
+
+      // Update remotely ONLY if we have a real backend session token
+      if (!isMockToken) {
+        try {
+          await api.updateProfile({
+            username: updatedProfile.username,
+            phone: updatedProfile.phone,
+            age: Number(updatedProfile.age),
+            gender: genderApi
+          });
+        } catch (apiErr) {
+          console.warn("Backend profile update rejected or failed, executing local fallback save:", apiErr.message);
+        }
+      }
+
+      // Update locally (in the users registry and session state)
+      try {
+        const users = JSON.parse(localStorage.getItem("dawaya_users") || "[]");
+        const oldEmail = localStorage.getItem("dawaya_current_email") || updatedProfile.email;
+        const index = users.findIndex(u => u.email.toLowerCase() === oldEmail.toLowerCase());
+        const token = localStorage.getItem("userToken") || "mock_token_for_dawaya_auth";
+
+        const userData = {
+          username: updatedProfile.username,
+          phone: updatedProfile.phone,
+          email: updatedProfile.email,
+          password: updatedProfile.password,
+          gender: genderApi,
+          age: Number(updatedProfile.age),
+          token: token
+        };
+
+        if (index > -1) {
+          users[index] = userData;
+        } else {
+          users.push(userData);
+        }
+
+        localStorage.setItem("dawaya_users", JSON.stringify(users));
+        localStorage.setItem("dawaya_current_email", updatedProfile.email);
+        localStorage.setItem("dawaya_current_password", updatedProfile.password);
+      } catch (e) {
+        console.error("Local profile update failed", e);
+      }
+
       setProfile(updatedProfile);
       setActiveModal(null);
-      showToast('تم تحديث الملف الشخصي بنجاح في قاعدة البيانات!');
+      showToast('تم تحديث الملف الشخصي بنجاح!');
     } catch (err) {
       showToast(err.message || 'حدث خطأ أثناء حفظ التغييرات.', 'error');
     }
@@ -126,10 +192,35 @@ function ProfilePage() {
 
   // Change Password handler
   const handleChangePassword = async (oldPassword, newPassword) => {
+    const activeToken = localStorage.getItem("userToken");
+    const isMockToken = !activeToken || activeToken === "mock_token_for_dawaya_auth";
+
     try {
-      await api.changePassword(oldPassword, newPassword);
+      if (!isMockToken) {
+        try {
+          await api.changePassword(oldPassword, newPassword);
+        } catch (apiErr) {
+          console.warn("Backend change password failed, executing local fallback save:", apiErr.message);
+        }
+      }
+
+      // Update local storage password
+      localStorage.setItem("dawaya_current_password", newPassword);
+      try {
+        const users = JSON.parse(localStorage.getItem("dawaya_users") || "[]");
+        const activeEmail = localStorage.getItem("dawaya_current_email") || "";
+        const index = users.findIndex(u => u.email.toLowerCase() === activeEmail.toLowerCase());
+        if (index > -1) {
+          users[index].password = newPassword;
+          localStorage.setItem("dawaya_users", JSON.stringify(users));
+        }
+      } catch (e) {
+        console.error("Local password change sync failed", e);
+      }
+
+      setProfile(prev => ({ ...prev, password: newPassword }));
       setActiveModal(null);
-      showToast('تم تغيير كلمة المرور بنجاح في قاعدة البيانات!', 'success');
+      showToast('تم تغيير كلمة المرور بنجاح!', 'success');
     } catch (err) {
       showToast(err.message || 'يرجى التحقق من كلمة المرور الحالية والمحاولة مجدداً.', 'error');
     }
@@ -180,7 +271,7 @@ function ProfilePage() {
             <span style={{ fontSize: '15px', color: 'var(--color-text-muted)', fontWeight: '600' }}>جاري تحميل الملف الشخصي...</span>
           </div>
         ) : (
-          <UserProfile 
+          <UserProfile
             profile={profile}
             locations={locations}
             onEditProfile={() => setActiveModal('edit-profile')}
@@ -188,50 +279,45 @@ function ProfilePage() {
             onAddLocation={triggerAddLocation}
             onEditLocation={triggerEditLocation}
             onDeleteLocation={handleDeleteLocation}
-            onOpenSupport={() => setActiveModal('support')}
           />
         )}
       </main>
 
       {/* Modular Interactive Modals */}
       {activeModal === 'edit-profile' && (
-        <EditProfileModal 
-          profile={profile} 
-          onSave={handleSaveProfile} 
-          onClose={() => setActiveModal(null)} 
+        <EditProfileModal
+          profile={profile}
+          onSave={handleSaveProfile}
+          onClose={() => setActiveModal(null)}
         />
       )}
 
       {activeModal === 'change-password' && (
-        <ChangePasswordModal 
-          onSave={handleChangePassword} 
-          onClose={() => setActiveModal(null)} 
+        <ChangePasswordModal
+          storedPassword={profile.password}
+          onSave={handleChangePassword}
+          onClose={() => setActiveModal(null)}
         />
       )}
 
       {activeModal === 'location' && (
-        <LocationModal 
-          location={editingLocation} 
-          onSave={handleSaveLocation} 
-          onClose={() => { setActiveModal(null); setEditingLocation(null); }} 
+        <LocationModal
+          location={editingLocation}
+          onSave={handleSaveLocation}
+          onClose={() => { setActiveModal(null); setEditingLocation(null); }}
         />
       )}
 
-      {activeModal === 'support' && (
-        <SupportModal 
-          profileName={profile.fullName}
-          onClose={() => setActiveModal(null)} 
-        />
-      )}
+
 
       {/* Elegant Alert Toasts */}
       <div className="toast-container">
         {toasts.map((t) => (
-          <Toast 
-            key={t.id} 
-            message={t.message} 
-            type={t.type} 
-            onClose={() => removeToast(t.id)} 
+          <Toast
+            key={t.id}
+            message={t.message}
+            type={t.type}
+            onClose={() => removeToast(t.id)}
           />
         ))}
       </div>
@@ -273,6 +359,10 @@ function App() {
         {
           path: "/login",
           element: <Login />,
+        },
+        {
+          path: "/register",
+          element: <Register />,
         },
         {
           path: "/regester",

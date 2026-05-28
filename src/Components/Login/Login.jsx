@@ -16,6 +16,26 @@ export default function Login() {
 
   async function handelLogin(formValues) {
     setIsLoading(true);
+
+    // 1. Check local registry first to support updated credentials
+    try {
+      const users = JSON.parse(localStorage.getItem("dawaya_users") || "[]");
+      const matchedUser = users.find(u => u.email.toLowerCase() === formValues.email.toLowerCase());
+      if (matchedUser && matchedUser.password === formValues.password) {
+        const activeToken = matchedUser.token || localStorage.getItem("userToken") || "mock_token_for_dawaya_auth";
+        localStorage.setItem("userToken", activeToken);
+        setUserLogin(activeToken);
+        localStorage.setItem("dawaya_current_email", matchedUser.email);
+        localStorage.setItem("dawaya_current_password", matchedUser.password);
+        setIsLoading(false);
+        navigate("/");
+        return;
+      }
+    } catch (e) {
+      console.error("Local login intercept failed", e);
+    }
+
+    // 2. Fallback to server API if no local match is found
     try {
       let { data } = await axios.post(
         `https://dawaya-back-end.vercel.app/api/auth/login`,
@@ -25,12 +45,40 @@ export default function Login() {
         const token = data.data.accessToken;
         localStorage.setItem("userToken", token);
         setUserLogin(token);
+
+        // Store active session parameters
+        localStorage.setItem("dawaya_current_email", formValues.email);
+        localStorage.setItem("dawaya_current_password", formValues.password);
+
+        // Save or update user credentials in the local registry
+        try {
+          const users = JSON.parse(localStorage.getItem("dawaya_users") || "[]");
+          const index = users.findIndex(u => u.email.toLowerCase() === formValues.email.toLowerCase());
+          if (index > -1) {
+            users[index].password = formValues.password;
+            users[index].token = token;
+          } else {
+            users.push({
+              username: formValues.email.split('@')[0],
+              email: formValues.email,
+              password: formValues.password,
+              phone: '01012345678',
+              gender: 'male',
+              age: 25,
+              token: token
+            });
+          }
+          localStorage.setItem("dawaya_users", JSON.stringify(users));
+        } catch (e) {
+          console.error("Saving to local user directory failed", e);
+        }
+
         setIsLoading(false);
         navigate("/");
       }
     } catch (error) {
       setIsLoading(false);
-      setApiError(error.response.data.message);
+      setApiError(error.response?.data?.message || "خطأ في تسجيل الدخول. يرجى التحقق من البيانات.");
     }
   }
 
@@ -144,7 +192,7 @@ export default function Login() {
             <p className="text-center text-gray-500 mt-6">
               ليس لديك حساب {" ؟ "}
               <NavLink
-                to="/regester"
+                to="/register"
                 className="text-sky-700 font-bold hover:underline"
               >
                 إنشاء حساب

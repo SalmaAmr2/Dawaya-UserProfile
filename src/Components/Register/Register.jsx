@@ -11,10 +11,10 @@ export default function Register() {
   const [apiError, setApiError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handelRegester(formValues) {
+  async function handleRegister(formValues) {
     setIsLoading(true);
 
-    let { rePassword, ...dataToSend } = formValues;
+    let { rePassword, age, ...dataToSend } = formValues;
 
     try {
       let { data } = await axios.post(
@@ -23,6 +23,32 @@ export default function Register() {
       );
 
       if (data.success) {
+        // Persist user registration details locally
+        try {
+          const users = JSON.parse(localStorage.getItem("dawaya_users") || "[]");
+          const index = users.findIndex(u => u.email.toLowerCase() === formValues.email.toLowerCase());
+          const userData = {
+            username: formValues.username,
+            phone: formValues.phone,
+            email: formValues.email,
+            password: formValues.password,
+            gender: formValues.gender || 'male',
+            age: Number(formValues.age) || 25
+          };
+          if (index > -1) {
+            users[index] = userData;
+          } else {
+            users.push(userData);
+          }
+          localStorage.setItem("dawaya_users", JSON.stringify(users));
+
+          // Save active password and email session
+          localStorage.setItem("dawaya_current_email", formValues.email);
+          localStorage.setItem("dawaya_current_password", formValues.password);
+        } catch (e) {
+          console.error("Local storage register sync failed", e);
+        }
+
         setIsLoading(false);
         console.log(data.message);
         navigate("/verifyotp");
@@ -58,6 +84,13 @@ export default function Register() {
       .string()
       .oneOf([yup.ref("password")], "كلمة المرور غير متطابقة")
       .required("تأكيد كلمة المرور مطلوب"),
+    age: yup
+      .number()
+      .typeError("العمر يجب أن يكون رقماً")
+      .integer("العمر يجب أن يكون عدداً صحيحاً")
+      .min(1, "العمر يجب أن يكون سنة واحدة على الأقل")
+      .max(120, "العمر يجب ألا يتجاوز 120 سنة")
+      .required("العمر مطلوب"),
   });
 
   let formik = useFormik({
@@ -68,9 +101,10 @@ export default function Register() {
       password: "",
       rePassword: "",
       gender: "",
+      age: "",
     },
     validationSchema,
-    onSubmit: handelRegester,
+    onSubmit: handleRegister,
   });
 
   return (
@@ -163,7 +197,29 @@ export default function Register() {
                     {formik.errors.phone}
                   </div>
                 ) : null}
-                
+
+                <div className="mb-5">
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    العمر
+                  </label>
+
+                  <input
+                    type="number"
+                    onBlur={formik.handleBlur}
+                    onChange={formik.handleChange}
+                    name="age"
+                    value={formik.values.age}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 outline-none focus:border-sky-500"
+                    placeholder="أدخل العمر"
+                  />
+                </div>
+
+                {formik.errors.age && formik.touched.age ? (
+                  <div className="mb-5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm p-3">
+                    {formik.errors.age}
+                  </div>
+                ) : null}
+
                 <div className="mb-5">
                   <label className="block mb-3 text-sm font-medium text-gray-700">
                     النوع

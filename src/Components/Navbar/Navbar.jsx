@@ -30,7 +30,7 @@ export default function Navbar() {
               {userLogin == null ? (
                 <>
                   <NavLink
-                    to="/regester"
+                    to="/register"
                     className="text-sm font-medium pl-5 hover:underline"
                   >
                     إنشاء حساب
