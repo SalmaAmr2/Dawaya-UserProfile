@@ -24,11 +24,11 @@ import ResetPassword from "./Components/ResetPassword/ResetPassword";
 import VerifyCompleted from "./Components/VerifyCompleted/VerifyCompleted";
 // Default initial state for fallback/new users
 const INITIAL_PROFILE = {
-  fullName: 'أليكس جونسون',
-  username: 'alexjohnson_88',
-  email: 'alex.j@healthcare.com',
-  phone: '+1 (555) 012-3456',
-  age: 32,
+  fullName: 'user1',
+  username: 'username1',
+  email: 'user1@gmail.com',
+  phone: '01234567890',
+  age: 20,
   gender: 'ذكر'
 };
 
