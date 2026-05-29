@@ -1,5 +1,6 @@
 # 🩺 DAWAYA | داوايا - User Profile Platform
 
+<<<<<<< HEAD
 <div align="center">
   <img src="https://img.shields.io/badge/Vite-8A2BE2?style=for-the-badge&logo=vite&logoColor=white" />
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
@@ -126,3 +127,6 @@ dawaya-profile/
 - **نظام الألوان HSL Tailored**: استخدام تدرج لوني أزرق سماوي نابض بالحياة (`#0284c7` إلى `#3b82f6`) كعلامة مميزة للمنصة الطبية.
 - **بطاقات Glassmorphism**: استخدام خلفيات شبه شفافة مدعومة بتأثير غشاوة وتظليل ناعم يمنح عمقًا بصريًا.
 - **تأثيرات حركية (Micro-Animations)**: تأثيرات تحويم وانتقالات سلسة على البطاقات والأزرار لزيادة التفاعل مع المستخدم.
+=======
+منصة متكاملة للرعاية الصحية وإدارة الصيدليات والوصفات الطبية بكل سهولة وأمان، مدمجة مع نظام الملف الشخصي المتميز للأعضاء.
+>>>>>>> 636cdf5cd0c3fa8377d2c5bef70c1630d627487b
