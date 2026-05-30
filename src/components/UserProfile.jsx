@@ -24,20 +24,17 @@ export default function UserProfile({
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Toggle three dots menu for locations
   const toggleLocationMenu = (id, e) => {
     e.stopPropagation();
     setActiveLocationMenu(activeLocationMenu === id ? null : id);
   };
 
-  // Close location menu
   React.useEffect(() => {
     const closeMenu = () => setActiveLocationMenu(null);
     document.addEventListener('click', closeMenu);
     return () => document.removeEventListener('click', closeMenu);
   }, []);
 
-  // Sync password expansion state to clear forms on successful parent updates
   React.useEffect(() => {
     if (profile.password && passwords.newPass === profile.password) {
       setIsChangePasswordExpanded(false);
@@ -47,7 +44,6 @@ export default function UserProfile({
     }
   }, [profile.password]);
 
-  // Checklist criteria logic
   const isLengthValid = passwords.newPass.length >= 8;
   const isSpecialValid = /[!@#$%^&*(),.?":{}|<>_]/.test(passwords.newPass);
   const isCapitalValid = /[A-Z]/.test(passwords.newPass);
@@ -71,7 +67,6 @@ export default function UserProfile({
     strengthColor = '#0284c7'; // Solid blue as in screenshot
   }
 
-  // Update password local handler
   const handleUpdatePassword = (e) => {
     e.preventDefault();
     setError('');
@@ -136,10 +131,8 @@ export default function UserProfile({
     <div className="container" style={{ margin: "5px" }}>
       <div className="app-grid" style={{ margin: "10px" }}>
 
-        {/* RIGHT COLUMN: Banner, Information, and Security details */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-          {/* Card 1: User Profile Banner with Vibrant Sky Gradient */}
           <div className="card animate-fade-in" style={{
             padding: 0,
             overflow: 'hidden',
@@ -148,19 +141,16 @@ export default function UserProfile({
             boxShadow: 'var(--shadow-md)',
             backgroundColor: '#ffffff'
           }}>
-            {/* Top Backdrop Gradient */}
             <div style={{
               height: '30px',
               background: 'linear-gradient(135deg, #e0f2fe 0%, #faf7fb 100%)',
               position: 'relative',
               // overflow: 'hidden'
             }}>
-              {/* Decorative blurred rings */}
               <div style={{ position: 'absolute', top: '10%', right: '8%', width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.04)', filter: 'blur(8px)' }} />
               <div style={{ position: 'absolute', bottom: '-20%', left: '12%', width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.03)', filter: 'blur(6px)' }} />
             </div>
 
-            {/* Profile Avatar & Details Section */}
             <div style={{
               padding: '24px 32px 32px 32px',
               marginTop: '-25px',
@@ -168,7 +158,6 @@ export default function UserProfile({
               alignItems: 'center',
               gap: '24px'
             }}>
-              {/* Avatar on the right in RTL */}
               <div style={{ position: 'relative', zIndex: 10 }}>
                 <div style={{
                   marginTop: '15px',
@@ -190,7 +179,6 @@ export default function UserProfile({
                 </div>
               </div>
 
-              {/* Username details and edit trigger column */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                   <h2 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--color-text-main)', margin: 0 }}>{profile.fullName}</h2>
@@ -243,7 +231,6 @@ export default function UserProfile({
             </div>
           </div>
 
-          {/* Card 2: Personal Information Grid */}
           <div className="card" style={{ padding: '32px', borderRadius: '24px', boxShadow: 'var(--shadow-md)', backgroundColor: '#ffffff' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '32px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
               <User size={20} style={{ color: 'var(--color-brand)' }} />
@@ -259,7 +246,6 @@ export default function UserProfile({
 
 
 
-              {/* Field 2: Username */}
               <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
                 <span className="form-label" style={{ marginBottom: '8px', display: 'block' }}>اسم المستخدم</span>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -268,7 +254,6 @@ export default function UserProfile({
                 </div>
               </div>
 
-              {/* Field 3: Phone */}
               <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
                 <span className="form-label" style={{ marginBottom: '8px', display: 'block' }}>رقم الهاتف</span>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -277,7 +262,6 @@ export default function UserProfile({
                 </div>
               </div>
 
-              {/* Field 4: Email */}
               <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
                 <span className="form-label" style={{ marginBottom: '8px', display: 'block' }}>البريد الإلكتروني</span>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -286,7 +270,6 @@ export default function UserProfile({
                 </div>
               </div>
 
-              {/* Field 5: Gender */}
               <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
                 <span className="form-label" style={{ marginBottom: '8px', display: 'block' }}>الجنس</span>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -295,7 +278,6 @@ export default function UserProfile({
                 </div>
               </div>
 
-              {/* Field 6: Age */}
               <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
                 <span className="form-label" style={{ marginBottom: '8px', display: 'block' }}>العمر</span>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -307,7 +289,6 @@ export default function UserProfile({
             </div>
           </div>
 
-          {/* Card 3: Security & Password collapsible details */}
           <div className="card" style={{ padding: '32px', borderRadius: '24px', boxShadow: 'var(--shadow-md)', backgroundColor: '#ffffff' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: isChangePasswordExpanded ? '32px' : '0px', borderBottom: isChangePasswordExpanded ? '1px solid #f1f5f9' : 'none', paddingBottom: isChangePasswordExpanded ? '16px' : '0px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -374,7 +355,6 @@ export default function UserProfile({
             {isChangePasswordExpanded && (
               <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '32px', marginTop: '16px' }} className="form-row">
 
-                {/* Right Form Fields */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   {error && (
                     <div style={{
@@ -441,7 +421,6 @@ export default function UserProfile({
                   </div>
                 </div>
 
-                {/* Left Password Strength Card */}
                 <div style={{
                   backgroundColor: '#f8fafc',
                   border: '1px solid #e2e8f0',
@@ -453,7 +432,6 @@ export default function UserProfile({
                 }}>
                   <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-main)' }}>قوة كلمة المرور</span>
 
-                  {/* Progress Indicator */}
                   <div style={{
                     width: '100%',
                     height: '6px',
@@ -475,7 +453,6 @@ export default function UserProfile({
                     <span style={{ fontSize: '10px', color: 'var(--color-text-muted)', fontWeight: '600' }}>ينصح بكلمة مرور معقدة</span>
                   </div>
 
-                  {/* Criteria Checklist */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '4px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: '700', color: isLengthValid ? 'var(--color-text-main)' : 'var(--color-text-muted)' }}>
                       <CheckCircleIcon checked={isLengthValid} />
@@ -521,10 +498,8 @@ export default function UserProfile({
 
         </div>
 
-        {/* LEFT COLUMN: Sidebar (Locations) */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-          {/* Card 2: Saved Locations */}
           <div className="card" style={{ padding: '24px', borderRadius: '24px', boxShadow: 'var(--shadow-md)', backgroundColor: '#ffffff' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <span style={{ fontSize: '13px', fontWeight: '700' }}>المواقع المحفوظة</span>
@@ -570,7 +545,6 @@ export default function UserProfile({
                     <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', lineHeight: '1.4' }}>{loc.address}</p>
                   </div>
 
-                  {/* Options dots menu button */}
                   <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
                     <button
                       style={{

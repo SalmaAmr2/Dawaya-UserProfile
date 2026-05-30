@@ -14,7 +14,6 @@ import ForgetPassword from "./Components/ForgetPassword/ForgetPassword";
 import ResetPassword from "./Components/ResetPassword/ResetPassword";
 import VerifyCompleted from "./Components/VerifyCompleted/VerifyCompleted";
 
-// Profile components and services
 import UserProfile from './components/UserProfile';
 import Toast from './components/Toast';
 import { api } from './services/api';
@@ -24,7 +23,6 @@ import {
   LocationModal
 } from './components/Modals';
 
-// Default initial state for fallback/new users
 const INITIAL_PROFILE = {
   fullName: 'عضو داوايا',
   username: 'dawaya_member',
@@ -50,21 +48,16 @@ const INITIAL_LOCATIONS = [
   }
 ];
 
-// 1. Standalone User Profile Page Component
 function ProfilePage() {
   const { userLogin } = useContext(UserContext);
   const [profile, setProfile] = useState(INITIAL_PROFILE);
   const [locations, setLocations] = useState(INITIAL_LOCATIONS);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Modals management
-  const [activeModal, setActiveModal] = useState(null); // 'edit-profile' | 'change-password' | 'location'
-  const [editingLocation, setEditingLocation] = useState(null); // Location object being edited, if any
-
-  // Toasts management
+  const [activeModal, setActiveModal] = useState(null);
+  const [editingLocation, setEditingLocation] = useState(null);
   const [toasts, setToasts] = useState([]);
 
-  // Trigger custom toast alert
   const showToast = (message, type = 'success') => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, message, type }]);
@@ -74,7 +67,6 @@ function ProfilePage() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Fetch active user profile from live Vercel API
   const fetchProfile = async () => {
     const activeToken = userLogin || localStorage.getItem('userToken');
     if (!activeToken) return;
@@ -98,7 +90,6 @@ function ProfilePage() {
         gender: apiUser.gender === 'male' || apiUser.gender === 'ذكر' ? 'ذكر' : 'أنثى'
       });
     } catch (err) {
-      // Offline/Local fallback loading if API call fails
       try {
         const localEmail = localStorage.getItem("dawaya_current_email") || "";
         const localPassword = localStorage.getItem("dawaya_current_password") || "";
@@ -125,12 +116,10 @@ function ProfilePage() {
     }
   };
 
-  // Fetch on mount or when token updates
   useEffect(() => {
     fetchProfile();
   }, [userLogin]);
 
-  // Profile Save handler
   const handleSaveProfile = async (updatedProfile) => {
     const activeToken = localStorage.getItem("userToken");
     const isMockToken = !activeToken || activeToken === "mock_token_for_dawaya_auth";
@@ -138,7 +127,6 @@ function ProfilePage() {
     try {
       const genderApi = updatedProfile.gender === 'ذكر' ? 'male' : 'female';
 
-      // Update remotely ONLY if we have a real backend session token
       if (!isMockToken) {
         try {
           await api.updateProfile({
@@ -152,7 +140,6 @@ function ProfilePage() {
         }
       }
 
-      // Update locally (in the users registry and session state)
       try {
         const users = JSON.parse(localStorage.getItem("dawaya_users") || "[]");
         const oldEmail = localStorage.getItem("dawaya_current_email") || updatedProfile.email;
@@ -190,7 +177,6 @@ function ProfilePage() {
     }
   };
 
-  // Change Password handler
   const handleChangePassword = async (oldPassword, newPassword) => {
     const activeToken = localStorage.getItem("userToken");
     const isMockToken = !activeToken || activeToken === "mock_token_for_dawaya_auth";
@@ -204,7 +190,6 @@ function ProfilePage() {
         }
       }
 
-      // Update local storage password
       localStorage.setItem("dawaya_current_password", newPassword);
       try {
         const users = JSON.parse(localStorage.getItem("dawaya_users") || "[]");
@@ -226,7 +211,6 @@ function ProfilePage() {
     }
   };
 
-  // Location Save handler (Create / Update)
   const handleSaveLocation = (locData) => {
     if (locData.id) {
       setLocations((prev) =>
@@ -245,19 +229,16 @@ function ProfilePage() {
     setEditingLocation(null);
   };
 
-  // Delete Location handler
   const handleDeleteLocation = (id) => {
     setLocations((prev) => prev.filter((l) => l.id !== id));
     showToast('تم حذف الموقع بنجاح!', 'error');
   };
 
-  // Open location modal for editing
   const triggerEditLocation = (location) => {
     setEditingLocation(location);
     setActiveModal('location');
   };
 
-  // Open location modal for creating
   const triggerAddLocation = () => {
     setEditingLocation(null);
     setActiveModal('location');
@@ -283,7 +264,6 @@ function ProfilePage() {
         )}
       </main>
 
-      {/* Modular Interactive Modals */}
       {activeModal === 'edit-profile' && (
         <EditProfileModal
           profile={profile}
@@ -310,7 +290,6 @@ function ProfilePage() {
 
 
 
-      {/* Elegant Alert Toasts */}
       <div className="toast-container">
         {toasts.map((t) => (
           <Toast
@@ -325,7 +304,6 @@ function ProfilePage() {
   );
 }
 
-// 2. Central Router & App Component
 function App() {
   let router = createBrowserRouter([
     {

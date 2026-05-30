@@ -17,7 +17,6 @@ export default function Login() {
   async function handelLogin(formValues) {
     setIsLoading(true);
 
-    // 1. Check local registry first to support updated credentials
     try {
       const users = JSON.parse(localStorage.getItem("dawaya_users") || "[]");
       const matchedUser = users.find(u => u.email.toLowerCase() === formValues.email.toLowerCase());
@@ -35,7 +34,6 @@ export default function Login() {
       console.error("Local login intercept failed", e);
     }
 
-    // 2. Fallback to server API if no local match is found
     try {
       let { data } = await axios.post(
         `https://dawaya-back-end.vercel.app/api/auth/login`,
@@ -46,11 +44,9 @@ export default function Login() {
         localStorage.setItem("userToken", token);
         setUserLogin(token);
 
-        // Store active session parameters
         localStorage.setItem("dawaya_current_email", formValues.email);
         localStorage.setItem("dawaya_current_password", formValues.password);
 
-        // Save or update user credentials in the local registry
         try {
           const users = JSON.parse(localStorage.getItem("dawaya_users") || "[]");
           const index = users.findIndex(u => u.email.toLowerCase() === formValues.email.toLowerCase());

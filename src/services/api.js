@@ -1,6 +1,5 @@
 const BASE_URL = 'https://dawaya-back-end.vercel.app';
 
-// Helper to get auth headers
 function getHeaders() {
   const headers = {
     'Content-Type': 'application/json',
@@ -14,7 +13,6 @@ function getHeaders() {
 
 export const api = {
 
-  // Get Profile
   async getProfile() {
     const headers = getHeaders();
     console.log('Fetching profile with headers:', headers);
@@ -47,7 +45,6 @@ export const api = {
     return response.json();
   },
 
-  // Update Profile
   async updateProfile(profileData) {
     const response = await fetch(`${BASE_URL}/api/user/profile`, {
       method: 'PUT',
@@ -78,7 +75,6 @@ export const api = {
     return response.json();
   },
 
-  // Change Password
   async changePassword(oldPassword, newPassword) {
     const response = await fetch(`${BASE_URL}/api/user/changepassword`, {
       method: 'PATCH',
@@ -104,12 +100,10 @@ export const api = {
     return response.json();
   },
 
-  // Logout
   logout() {
     localStorage.removeItem('userToken');
   },
 
-  // Check if user is logged in
   isLoggedIn() {
     return !!localStorage.getItem('userToken');
   }
